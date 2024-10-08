@@ -4,8 +4,12 @@
     "slug": "Chef-ChrisToffel-Menu-App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/ChefAtYourService.png",
     "userInterfaceStyle": "light",
+    "permissions": [
+    "camera",
+    "mediaLibrary"
+  ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -22,6 +26,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
+    
   }
 }

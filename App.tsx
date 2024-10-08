@@ -1,20 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import AddMenuItemScreen from './screens/AddMenuItemScreen';
+import ViewMenuScreen from './screens/ViewMenuScreen';
+import HomeScreen from './screens/HomeScreen';
+import EditMenuItem from './screens/EditMenuItem';
+import { MenuItem } from './MenuItem';
 
-export default function App() {
+const Stack = createStackNavigator();
+
+const App: React.FC = () => {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+
+  useEffect(() => {
+    console.log(`Total items in menu: ${menuItems.length}`);
+  }, [menuItems]);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home">
+          {(props) => <HomeScreen {...props} menuItems={menuItems} />}
+        </Stack.Screen>
+        <Stack.Screen name="ViewMenu">
+          {(props) => <ViewMenuScreen {...props} menuItems={menuItems} />}
+        </Stack.Screen>
+        <Stack.Screen name="AddMenuItem">
+          {(props) => <AddMenuItemScreen {...props} setMenuItems={setMenuItems} menuItems={menuItems} />}
+        </Stack.Screen>
+        <Stack.Screen name="EditMenuItem">
+          {(props) => <EditMenuItem {...props} setMenuItems={setMenuItems} menuItems={menuItems} />}
+        </Stack.Screen>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
