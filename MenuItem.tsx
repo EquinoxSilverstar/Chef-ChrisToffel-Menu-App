@@ -5,3 +5,4 @@ export type MenuItem = {
   price: number;
   imageUri?: string;  // imageUri is optional
 };
+

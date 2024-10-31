@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
-import * as ImagePicker from 'expo-image-picker'; // Import Image Picker from expo-image-picker
+import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Alert, } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
 import { StackScreenProps } from '@react-navigation/stack';
-import { AppStackParamList } from '../AppStackParaList';
+import { AppStackParamList } from '../AppStackParamList';
 import { MenuItem } from '../MenuItem';
 
 type AddMenuItemScreenProps = StackScreenProps<AppStackParamList, 'AddMenuItem'> & {
@@ -10,10 +11,11 @@ type AddMenuItemScreenProps = StackScreenProps<AppStackParamList, 'AddMenuItem'>
   menuItems: MenuItem[];
 };
 
-const categories = ['Appetizer', 'Main Course', 'Dessert'];
+
+const categories = ['Starter', 'Main', 'Dessert'];
 
 const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMenuItems, menuItems }) => {
-  const [name, setName] = useState ('');
+  const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
@@ -29,26 +31,20 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
         imageUri: imageUri || '',
       };
 
-      // Add the new item to the menuItems array
       setMenuItems([...menuItems, newMenuItem]);
-
-      // Go back to the ViewMenu screen
       navigation.goBack();
     } else {
-      alert('Please fill in all fields');
+      Alert.alert('Please fill in all fields');
     }
   };
 
-  // Function to handle image picking
   const pickImage = async () => {
-    // Ask for permission to access the camera roll
-    const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (result.granted === false) {
-      alert('Permission to access gallery is required!');
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission to access gallery is required!');
       return;
     }
 
-    // Open image picker
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -58,16 +54,24 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
 
     if (!pickerResult.canceled) {
       setImageUri(pickerResult.assets[0].uri);
-      console.log("Selected Image URI: ", pickerResult.assets[0].uri); // Log URI to ensure it's valid
+      console.log("Selected Image URI: ", pickerResult.assets[0].uri);
     }
-      // Set the selected image URI
-       // Save the selected image URI
-    }
-
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add Menu Item</Text>
+      <Text style={styles.title}>PICK A IMAGE</Text>
+      
+      <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
+        <Image
+          source={require('../assets/add-button.png')}
+          style={styles.icon}
+        />
+      </TouchableOpacity>
+      {imageUri && (
+        <Image source={{ uri: imageUri }} style={styles.image} />
+      )}
+      
       <TextInput
         placeholder="Name"
         value={name}
@@ -88,7 +92,6 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
         style={styles.input}
       />
 
-      {/* Dropdown for categories */}
       <View style={styles.pickerContainer}>
         <Text>Select a Category</Text>
         <View style={styles.dropdown}>
@@ -96,34 +99,41 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
             <Button
               key={cat}
               title={cat}
-              color={category === cat ? 'blue' : 'gray'}
+              color={category === cat ? 'black' : 'gray'}
               onPress={() => setCategory(cat)}
             />
           ))}
         </View>
       </View>
-
-      {/* Image Picker and Display */}
-      <Button title="Pick an Image" onPress={pickImage} />
-      {imageUri && (
-        <Image source={{ uri: imageUri }} style={styles.image} />
-      )}
-
-      <Button title="Add Item" onPress={onAddMenuItem} />
+      
+      <View style={styles.buttonContainer}>
+        <Button title="Add Item" onPress={onAddMenuItem} color="black" />
+        <TouchableOpacity onPress={() => navigation.navigate('ViewMenu')}>
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+      
+      
     </View>
-  );
+  );   
 };
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "yellow",
     flex: 1,
     padding: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 20,
+    marginLeft: 100,
+    fontFamily: 'monospace',
   },
   input: {
+    backgroundColor: "white",
+    borderRadius: 8,
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
@@ -134,14 +144,48 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dropdown: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-around',
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 100,
+    height: 100,
     marginTop: 20,
+    marginBottom: 20,
+    marginLeft: 120,
+    borderRadius: 5,
+    borderColor: 'gray',
+    borderWidth: 1,
+    justifyContent: 'center',
+  },
+  imagePickerButton: {
+    backgroundColor: 'black',
+    width: 100,
+    height: 100,
+    marginRight: 90,
+    marginLeft: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderRadius: 5,
+  },
+  icon: {
+    width: 80,
+    height: 80,
+    tintColor: 'white',
+  },
+  buttonContainer: {
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cancelText: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+    marginTop: 10,
   },
 });
+
+console.log(`i implemented a picker`);
 
 export default AddMenuItemScreen;

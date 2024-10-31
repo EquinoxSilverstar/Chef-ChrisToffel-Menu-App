@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
-import { AppStackParamList } from '../AppStackParaList';
+import { AppStackParamList } from '../AppStackParamList';
 import { MenuItem } from '../MenuItem';
 
 type EditMenuItemScreenProps = StackScreenProps<AppStackParamList, 'EditMenuItem'> & {
@@ -68,7 +68,7 @@ const EditMenuItem: React.FC<EditMenuItemScreenProps> = ({ route, navigation, se
         onChangeText={setImageUri}
         style={styles.input}
       />
-      <Button title="Save Changes" onPress={onSaveChanges} />
+      <Button title="Save Changes" color= 'black' onPress={onSaveChanges} />
     </View>
   );
 };
@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
+
 });
 
 export default EditMenuItem;

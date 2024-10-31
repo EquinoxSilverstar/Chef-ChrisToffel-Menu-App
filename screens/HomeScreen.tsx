@@ -1,134 +1,112 @@
-import React, { useState, useEffect } from 'react';
-import {View,Text,TextInput,TouchableOpacity,FlatList,StyleSheet,Image,ScrollView, Alert, Button} from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Image, View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MenuItem } from '../MenuItem'; // Ensure MenuItem is correctly defined
 
-
-
-const courses = ['Starter', 'Main Course', 'Dessert'];
-
-const HomeScreen: React.FC = () => {
+const HomeScreen = () => {
   const navigation = useNavigation();
+  const [buttonText, setButtonText] = useState("The Chef options");
+  const [buttonText2, setButtonText2] = useState("Filter Menu");
+  const [isModalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(-20)).current;
 
-  // State variables for input fields
-  const [name, setDishName] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [category, setCourse] = useState<string>('');
-  const [price, setPrice] = useState<string>('');
-
-  // Local state for menuItems
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  useEffect(() => {
-    console.log(`Total items in menu: ${menuItems.length}`);
-  }, [menuItems]);
-
-  const addMenuItem = async () => {
-    if (name && description && category && price && !isNaN(parseFloat(price))) {
-      const newItem: MenuItem = {
-        name,
-        description,
-        category,
-        price: parseFloat(price),
-        
-      };
-      setMenuItems([...menuItems, newItem]); // Update the menu items
-
-      // Clear the input fields
-      setDishName('');
-      setDescription('');
-      setCourse('');
-      setPrice('');
-    } else {
-      Alert.alert('Error', 'Please fill in all fields with valid data');
-    }
+  const handleChefOptionPress = () => {
+    setModalVisible(true); // Show modal on Chef button press
   };
+
+  const confirmChefOption = () => {
+    setModalVisible(false);
+    setButtonText("Chef option");
+    navigation.navigate('ViewMenu');
+  };
+
+  const cancelChefOption = () => {
+    setModalVisible(false); // Close modal on cancel
+  };
+
+  const handleButtonPress2 = () => {
+    setButtonText2("Filter Course");
+    navigation.navigate('FilterMenu');
+  };
+
+  const startAnimation = () => {
+    scaleValue.setValue(1);
+    Animated.timing(scaleValue, {
+      toValue: 1.2,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start(() => {
+      Animated.timing(scaleValue, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
+  useEffect(() => {
+    startAnimation();
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+    Animated.timing(translateY, {
+      toValue: 0,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.backgroundContainer}>
-        <View style={styles.container}>
-          <View style={styles.imageContainer}>
-          <Image source={require('../assets/ChefAtYourService.png')} style={styles.image} />
-          </View>
-          <Text style={styles.text}>Enter Dish Name</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setDishName}
-            placeholder="Dish Name"
-            placeholderTextColor="grey"
+      <View style={styles.container}>
+        <View style={styles.imageContainer}>
+          <Animated.Image 
+            source={require('../assets/ChefAtYourService.png')} 
+            style={[styles.image, { transform: [{ scale: scaleValue }] }]} 
           />
-
-          <Text style={styles.text}>Description</Text>
-          <TextInput
-            style={styles.input}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Description"
-            placeholderTextColor="grey"
-          />
-
-          <Text style={styles.text}>Select The Course</Text>
-          <View style={styles.courseButtonContainer}>
-            {courses.map((courseOption) => (
-              <TouchableOpacity
-                key={courseOption}
-                style={[
-                  styles.courseButton,
-                  category === courseOption && styles.selectedCourseButton,
-                ]}
-                onPress={() => setCourse(courseOption)}
-              >
-                <Text
-                  style={[
-                    styles.courseButtonText,
-                    category === courseOption && styles.selectedCourseButtonText,
-                  ]}
-                >
-                  {courseOption}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Text style={styles.text}>Enter Price</Text>
-          <TextInput
-            style={styles.input}
-            value={price}
-            onChangeText={setPrice}
-            placeholder="Price"
-            keyboardType="numeric"
-            placeholderTextColor="grey"
-          />
-
-          <TouchableOpacity style={styles.button} onPress={addMenuItem}>
-            <Text style={styles.buttonText}>Add Menu Item</Text>
-          </TouchableOpacity>
         </View>
+        <Animated.Text 
+          style={[
+            styles.animatedText2,
+            { opacity: opacity, transform: [{ translateY: translateY }] }
+          ]}
+        >
+          Welcome {"\n"}to{"\n"} Chef Christoffels
+        </Animated.Text>
+        <Text style={styles.text}>Today's Menu for you</Text>
+        
+        <TouchableOpacity onPress={handleChefOptionPress} style={styles.button}>
+          <Text style={styles.buttonText}>{buttonText}</Text>
+        </TouchableOpacity>
 
-        <View style={styles.menuContainer}>
-          <Text style={styles.menuTitle}>Today's Menu</Text>
-          <FlatList
-            data={menuItems}
-            keyExtractor={(item) => item.name}  // Use a unique property like 'name'
-            renderItem={({ item }) => (
-            <View style={styles.menuItem}>
-              <View style={styles.menuTextContainer}>
-              <Text style={styles.menuText2}>{item.category}</Text>
-                <Text style={styles.menuText}>{item.name}</Text>
-                <Text style={styles.menuDescription}>{item.description}</Text>
-                <Text style={styles.price}>~R{item.price.toFixed(2)}</Text>
-              </View>
-              </View>
-            )}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-          />
-          <View style={styles.totalContainer}>
-            <Text style={styles.totalItems}>Total Items:</Text>
-            <Text style={styles.totalItemsCount}>{menuItems.length}</Text>
-          </View>
-        </View>
+        <TouchableOpacity onPress={handleButtonPress2} style={styles.button}>
+          <Text style={styles.buttonText}>{buttonText2}</Text>
+        </TouchableOpacity>
       </View>
+      
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={cancelChefOption}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalText}>Are you sure you want to access the Chef options?</Text>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={confirmChefOption}>
+                <Text style={styles.modalButtonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalButton} onPress={cancelChefOption}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -136,134 +114,84 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    padding: 20,
     backgroundColor: 'black',
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   container: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 20,
+  },
+  imageContainer: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+    borderRadius: 100,
   },
   text: {
+    fontFamily: 'monospace',
     color: 'white',
     fontSize: 22,
     marginVertical: 5,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderColor: 'white',
-    color: 'white',
-    width: '100%',
-    marginBottom: 15,
-    padding: 10,
-  },
-  courseButtonContainer: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-    width: '100%',
-    flexDirection: 'column',
-  },
-  courseButton: {
-    backgroundColor: 'gray',
-    padding: 10,
-    borderRadius: 5,
-    width: '90%',
-    alignItems: 'center',
-   
-  },
-  selectedCourseButton: {
-    backgroundColor: 'yellow',
-  },
-  courseButtonText: {
-    color: 'white',
-  },
-  selectedCourseButtonText: {
-    color: 'black',
-    fontWeight: 'bold',
+    textAlign: 'center',
   },
   button: {
     backgroundColor: 'yellow',
     padding: 10,
     borderRadius: 5,
     marginTop: 20,
-    width: '100%',
-    alignItems: 'center',
   },
   buttonText: {
+    color: 'black',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  menuContainer: {
-    marginTop: 20,
-    width: '100%',
-  },
-  menuTitle: {
-    fontSize: 20,
+  animatedText2: {
+    fontSize: 24,
+    color: '#FFF',
     fontWeight: 'bold',
-    fontFamily: 'monospace',
-    color: 'white',
-    marginBottom: 10,
-  },
-  menuItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-  },
-  menuTextContainer: {
-    marginBottom: 5,
-  },
-  menuText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  menuText2: {
-    fontSize: 29,
-    fontFamily: 'monospace',
-    fontWeight: 'bold',
-    color: 'yellow',
-  },
-  price: {
-    fontSize: 20,
-    color: 'yellow',
-  },
-  menuDescription: {
-    fontFamily: 'monospace',
-    color: 'white',
-  },
-  image: {
-    padding: 10,
-    width: 350,
-    height: 100,
-    resizeMode: 'cover',
-  },
-  imageContainer: {
-    marginBottom: 20,
-  },
-  totalContainer: {
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  totalItems: {
-    fontSize: 18,
-    color: 'white',
-  },
-  totalItemsCount: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'yellow',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#ccc',
+    textAlign: 'center',
     marginVertical: 10,
   },
-  backgroundContainer: {
-    backgroundColor: 'black',
+  modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    backgroundColor: 'yellow',
+    padding: 10,
+    borderRadius: 5,
+    width: '45%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: 'black',
+    fontWeight: 'bold',
   },
 });
 
