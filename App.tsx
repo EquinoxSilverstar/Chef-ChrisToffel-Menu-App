@@ -16,7 +16,6 @@ const App: React.FC = () => {
   useEffect(() => {
     console.log(`Total items in menu: ${menuItems.length}`);
   }, [menuItems]);
-
   return (
     <NavigationContainer>
       <Stack.Navigator
