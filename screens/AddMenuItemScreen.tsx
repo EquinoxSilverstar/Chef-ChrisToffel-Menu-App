@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Alert, } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -10,7 +10,6 @@ type AddMenuItemScreenProps = StackScreenProps<AppStackParamList, 'AddMenuItem'>
   setMenuItems: React.Dispatch<React.SetStateAction<MenuItem[]>>;
   menuItems: MenuItem[];
 };
-
 
 const categories = ['Starter', 'Main', 'Dessert'];
 
@@ -60,7 +59,7 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>PICK A IMAGE</Text>
+      <Text style={styles.title}>PICK AN IMAGE</Text>
       
       <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
         <Image
@@ -93,17 +92,16 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
       />
 
       <View style={styles.pickerContainer}>
-        <Text>Select a Category</Text>
-        <View style={styles.dropdown}>
+        <Text style={styles.pickerLabel}>Select a Category</Text>
+        <Picker
+          selectedValue={category}
+          onValueChange={(itemValue) => setCategory(itemValue)}
+          style={styles.picker}
+        >
           {categories.map((cat) => (
-            <Button
-              key={cat}
-              title={cat}
-              color={category === cat ? 'black' : 'gray'}
-              onPress={() => setCategory(cat)}
-            />
+            <Picker.Item key={cat} label={cat} value={cat} />
           ))}
-        </View>
+        </Picker>
       </View>
       
       <View style={styles.buttonContainer}>
@@ -112,8 +110,6 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
           <Text style={styles.cancelText}>Cancel</Text>
         </TouchableOpacity>
       </View>
-      
-      
     </View>
   );   
 };
@@ -141,11 +137,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   pickerContainer: {
+
     marginBottom: 20,
   },
-  dropdown: {
-    flexDirection: 'column',
-    justifyContent: 'space-around',
+
+  pickerLabel: {
+    fontFamily: 'monospace',
+    fontSize: 16,
+    marginBottom: 5,
+    
+  },
+
+  picker: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    height: 50,
+    width: '100%',
   },
   image: {
     width: 100,
@@ -185,7 +195,5 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-
-console.log(`i implemented a picker`);
 
 export default AddMenuItemScreen;

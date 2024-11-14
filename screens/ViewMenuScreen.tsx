@@ -11,14 +11,11 @@ type ViewMenuScreenProps = StackScreenProps<AppStackParamList, 'ViewMenu'> & {
 };
 
 const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, setMenuItems }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedItemName, setSelectedItemName] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [countdown, setCountdown] = useState(3);
 
   const handleDeleteItem = (item: MenuItem) => {
-    setSelectedItemName(item.name);
-    setCountdown(3); // Reset countdown
+    setSelectedItem(item);
     setIsModalVisible(true);
   };
 
@@ -51,21 +48,13 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
     }
   };
 
-  const handleDelete = (itemToDelete: MenuItem) => {
-    const updatedItems = menuItems.filter(item => item !== itemToDelete);
-    setMenuItems(updatedItems); // Triggers save in useEffect
-  };
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isModalVisible && countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    } else if (countdown === 0) {
-      handleDelete({ name: selectedItemName } as MenuItem);
-      setIsModalVisible(false);
+  const confirmDelete = () => {
+    if (selectedItem) {
+      const updatedItems = menuItems.filter(item => item !== selectedItem);
+      setMenuItems(updatedItems);
     }
-    return () => clearTimeout(timer);
-  }, [countdown, isModalVisible]);
+    setIsModalVisible(false);
+  };
 
   const renderMenuItem = ({ item }: { item: MenuItem }) => (
     <View style={styles.item}>
@@ -82,23 +71,7 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
       <Text style={styles.itemText}>~{item.category}</Text>
       <Text style={styles.itemTitle}>Description</Text>
       <Text style={styles.itemText}>~{item.description}</Text>
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Delete Item?</Text>
-            <Text style={styles.modalText}>
-              Are you sure you want to delete this item? Deletion in {countdown} seconds.
-            </Text>
-            <View style={styles.modalButtonContainer}>
-              <Button title="Cancel" color="black" onPress={() => setIsModalVisible(false)} />
-            </View>
-          </View>
-        </View>
-      </Modal>
+
       <View style={styles.ButtonAlign}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: 'rgb(255, 222, 0)' }]}
@@ -123,9 +96,6 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
   };
 
   const { total, average } = calculatePrices(menuItems);
-  const filteredItems = selectedCategory
-    ? menuItems.filter((item) => item.category === selectedCategory)
-    : menuItems;
 
   return (
     <View style={styles.container}>
@@ -147,14 +117,28 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
         </Text>
       ) : (
         <FlatList
-          data={filteredItems}
+          data={menuItems}
           keyExtractor={(item) => item.name}
           renderItem={renderMenuItem}
         />
       )}
+
+      <Modal visible={isModalVisible} transparent={true} onRequestClose={() => setIsModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Delete Item?</Text>
+            <Text style={styles.modalText}>Are you sure you want to delete this item?</Text>
+            <View style={styles.modalButtonContainer}>
+              <Button title="Yes" color="red" onPress={confirmDelete} />
+              <Button title="No" color="black" onPress={() => setIsModalVisible(false)} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+;
 
 const styles = StyleSheet.create({
   container: {
