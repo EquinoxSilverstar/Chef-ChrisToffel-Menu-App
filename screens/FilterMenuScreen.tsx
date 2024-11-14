@@ -19,7 +19,7 @@ const FilterMenuScreen: React.FC<{ menuItems: MenuItem[] }> = ({ menuItems }) =>
 
       <TextInput
         style={styles.searchBar}
-        placeholder="Search by name..."
+        placeholder="Search by name of the course..."
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
