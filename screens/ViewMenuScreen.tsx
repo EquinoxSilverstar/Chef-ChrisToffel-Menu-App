@@ -108,7 +108,7 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
         >
           <Text style={styles.buttonText}>Add Menu Item</Text>
         </TouchableOpacity>
-        <Text style={styles.totalPrice}>Total items: {menuItems.length}</Text>
+        <Text style={styles.totalPrice}>Total menu items: {menuItems.length}</Text>
         <Text style={styles.totalPrice}>Total Price: R{total.toFixed(2)}</Text>
         <Text style={styles.totalPrice}>Average Price: R{average.toFixed(2)}</Text>
       </View>
