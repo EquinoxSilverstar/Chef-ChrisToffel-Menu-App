@@ -92,7 +92,7 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
       />
 
       <View style={styles.pickerContainer}>
-        <Text style={styles.pickerLabel}>Select a Category</Text>
+        <Text style={styles.pickerLabel}>Please Select a Category</Text>
         <Picker
           selectedValue={category}
           onValueChange={(itemValue) => setCategory(itemValue)}
