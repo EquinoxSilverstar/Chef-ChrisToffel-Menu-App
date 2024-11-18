@@ -127,7 +127,7 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Delete Item?</Text>
-            <Text style={styles.modalText}>Are you sure you want to delete this item?</Text>
+            <Text style={styles.modalText}>Are you sure you want to delete this menu item?</Text>
             <View style={styles.modalButtonContainer}>
               <Button title="Yes" color="red" onPress={confirmDelete} />
               <Button title="No" color="black" onPress={() => setIsModalVisible(false)} />
