@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Modal, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Modal, Button, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackScreenProps } from '@react-navigation/stack';
 import { AppStackParamList } from '../AppStackParamList';
 import { MenuItem } from '../MenuItem';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type ViewMenuScreenProps = StackScreenProps<AppStackParamList, 'ViewMenu'> & {
   menuItems: MenuItem[];
@@ -57,7 +58,7 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
   };
 
   const renderMenuItem = ({ item }: { item: MenuItem }) => (
-    <View style={styles.item}>
+    <ScrollView style={styles.item}>
       {item.imageUri ? (
         <Image source={{ uri: item.imageUri }} style={styles.image} />
       ) : (
@@ -86,7 +87,7 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
           <Text style={styles.buttonText}>Delete</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 
   const calculatePrices = (items: MenuItem[]) => {
@@ -98,7 +99,7 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
   const { total, average } = calculatePrices(menuItems);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View>
         <Text style={styles.title}>Menu Items</Text>
         <TouchableOpacity
@@ -135,7 +136,7 @@ const ViewMenuScreen: React.FC<ViewMenuScreenProps> = ({ navigation, menuItems, 
           </View>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 };
 ;
