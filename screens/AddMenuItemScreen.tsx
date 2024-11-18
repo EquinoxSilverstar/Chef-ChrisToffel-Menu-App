@@ -1,46 +1,60 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import { StackScreenProps } from '@react-navigation/stack';
-import { AppStackParamList } from '../AppStackParamList';
 import { MenuItem } from '../MenuItem';
 
-type AddMenuItemScreenProps = StackScreenProps<AppStackParamList, 'AddMenuItem'> & {
-  setMenuItems: React.Dispatch<React.SetStateAction<MenuItem[]>>;
-  menuItems: MenuItem[];
-};
-
 const categories = ['Starter', 'Main', 'Dessert'];
+
+interface AddMenuItemScreenProps {
+  navigation: any;
+  setMenuItems: (menuItems: MenuItem[]) => void;
+  menuItems: MenuItem[];
+}
 
 const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMenuItems, menuItems }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(categories[0]); // Default category
   const [imageUri, setImageUri] = useState<string | null>(null);
 
-  const onAddMenuItem = () => {
-    if (name && description && price && category) {
-      const newMenuItem: MenuItem = {
-        name,
-        description,
-        price: parseFloat(price),
-        category,
-        imageUri: imageUri || '',
-      };
+  const [modalVisible, setModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-      setMenuItems([...menuItems, newMenuItem]);
-      navigation.goBack();
-    } else {
-      Alert.alert('Please fill in all fields');
+  const showErrorModal = (message: string) => {
+    setErrorMessage(message);
+    setModalVisible(true);
+  };
+
+  const onAddMenuItem = () => {
+    if (!name || !description || !price || !category) {
+      showErrorModal('Please fill in all fields');
+      return;
     }
+
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice)) {
+      showErrorModal('Price must be a valid number');
+      return;
+    }
+
+    const newMenuItem = {
+      name,
+      description,
+      price: parsedPrice,
+      category,
+      imageUri: imageUri || '',
+    };
+
+    setMenuItems([...menuItems, newMenuItem]);
+    navigation.goBack();
   };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission to access gallery is required!');
+      showErrorModal('Permission to access the gallery is required!');
       return;
     }
 
@@ -53,24 +67,21 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
 
     if (!pickerResult.canceled) {
       setImageUri(pickerResult.assets[0].uri);
-      console.log("Selected Image URI: ", pickerResult.assets[0].uri);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>PICK AN IMAGE</Text>
-      
+      <Text style={styles.title}>Add Menu Item</Text>
+
       <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
         <Image
           source={require('../assets/add-button.png')}
           style={styles.icon}
         />
       </TouchableOpacity>
-      {imageUri && (
-        <Image source={{ uri: imageUri }} style={styles.image} />
-      )}
-      
+      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
+
       <TextInput
         placeholder="Name"
         value={name}
@@ -92,7 +103,7 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
       />
 
       <View style={styles.pickerContainer}>
-        <Text style={styles.pickerLabel}>Please Select a Category</Text>
+        <Text style={styles.pickerLabel}>Select a Category</Text>
         <Picker
           selectedValue={category}
           onValueChange={(itemValue) => setCategory(itemValue)}
@@ -103,16 +114,37 @@ const AddMenuItemScreen: React.FC<AddMenuItemScreenProps> = ({ navigation, setMe
           ))}
         </Picker>
       </View>
-      
+
       <View style={styles.buttonContainer}>
         <Button title="Add Item" onPress={onAddMenuItem} color="black" />
         <TouchableOpacity onPress={() => navigation.navigate('ViewMenu')}>
           <Text style={styles.cancelText}>Cancel</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal for Errors */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{errorMessage}</Text>
+            <TouchableOpacity
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.textStyle}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
-  );   
+  );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -194,6 +226,52 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop: 10,
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+    
+  },
+  button: {
+    backgroundColor: "green",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  buttonClose: {
+    backgroundColor: "black",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontFamily: 'monospace',
+  }
+
 });
 
 export default AddMenuItemScreen;
