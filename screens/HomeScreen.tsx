@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Image, View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, Modal } from 'react-native';
+import { Image, View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, Modal, Pressable, Alert, TextInput, GestureResponderEvent } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
@@ -10,6 +10,20 @@ const HomeScreen = () => {
   const scaleValue = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-20)).current;
+
+  const [pin, setPin] = useState('');
+const [pinError, setPinError] = useState('');
+
+const validatePin = () => {
+  const correctPin = '1234'; // Replace with your actual PIN logic
+  if (pin === correctPin) {
+    confirmChefOption(); // Navigate if PIN is correct
+    setPinError('');
+  } else {
+    setPinError('Invalid PIN. Please try again.');
+  }
+};
+
 
   const handleChefOptionPress = () => {
     setModalVisible(true); // Show modal on Chef button press
@@ -59,8 +73,12 @@ const HomeScreen = () => {
     }).start();
   }, []);
 
+  function handleForgotPin(event: GestureResponderEvent): void {
+    throw new Error('Function not implemented.');
+  }
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <View style={styles.container}>
       <View style={styles.container}>
         <View style={styles.imageContainer}>
           <Animated.Image 
@@ -88,26 +106,41 @@ const HomeScreen = () => {
       </View>
       
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={cancelChefOption}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>Are you sure you want to access the Chef options?</Text>
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={styles.modalButton} onPress={confirmChefOption}>
-                <Text style={styles.modalButtonText}>Yes</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={cancelChefOption}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </ScrollView>
+  animationType="slide"
+  transparent={true}
+  visible={isModalVisible}
+  onRequestClose={cancelChefOption}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+      <Text style={styles.modalText}>
+        Please enter your PIN to access the Chef options.
+      </Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter PIN"
+          secureTextEntry={true}
+          value={pin}
+          onChangeText={setPin}
+        />
+      </View>
+      {pinError ? <Text style={styles.errorText}>{pinError}</Text> : null}
+      <TouchableOpacity style={styles.forgotButton} onPress={handleForgotPin}>
+       <Text style={styles.forgotButtonText}>Forgot PIN?</Text>
+      </TouchableOpacity>
+      <View style={styles.modalButtonContainer}>
+        <TouchableOpacity style={styles.modalButton} onPress={validatePin}>
+          <Text style={styles.modalButtonText}>proceed</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.modalButton} onPress={cancelChefOption}>
+          <Text style={styles.modalButtonText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+</View>
   );
 };
 
@@ -121,7 +154,9 @@ const styles = StyleSheet.create({
   },
   container: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 40,
+    backgroundColor: 'black',
+  
   },
   imageContainer: {
     width: 200,
@@ -193,6 +228,53 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
   },
+  inputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+  },
+  forgotButton: {
+    marginBottom: 10,
+  },
+  forgotButtonText: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+  },
+  pinInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  pinError: {
+    color:'red',
+    marginBottom: 10,
+  },
+  pinButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  pinButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  
+
 });
 
 export default HomeScreen;
